@@ -1,0 +1,222 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+#debugpy:
+wake_on_lan:
+
+yandex_station_intents: # https://github.com/dext0r/ha-yandex-station-intents
+  intents:
+    Включи телевизор:
+      extra_phrases:                  
+        - Телевизор
+      say_phrase: Слушаюсь, хозяин
+    Выключи телевизор: Окей
+    
+mega:
+  mega2:
+    led:
+      some_led2:
+        ws28xx: true
+        port: 35
+        order: brg
+        smooth: 100
+        
+automation water:
+  - alias: automation cold water
+    trigger:
+      - entity_id: binary_sensor.mega2_20
+        platform: state
+        from: 'on'
+        to: 'off'
+    action:
+        - data:
+            entity_id:
+              - counter.cold_water_counter
+          service: counter.increment
+          
+  - alias: automation hot water
+    trigger:
+      - entity_id: binary_sensor.mega2_21
+        platform: state
+        from: 'on'
+        to: 'off'
+    action:
+        - data:
+            entity_id:
+              - counter.hot_water_counter
+          service: counter.increment
+                 
+automation dd2:        
+  - alias: Датчик движения 2э включить
+    trigger:
+      platform: state
+      entity_id: binary_sensor.mega2_15
+      to: 'off'
+    condition: 
+       condition: state
+       entity_id: sun.sun
+       state: below_horizon
+    action:
+      service: light.turn_on
+      entity_id: light.mega2_12
+      data:
+        brightness: 60
+        
+  - alias: Датчик движения 2э выключить
+    trigger:
+      platform: state
+      entity_id: binary_sensor.mega2_15
+      to: 'on'
+      for: '00:00:05'
+    action:
+      service: light.turn_off
+      entity_id: light.mega2_12
+      
+  - alias: Датчик движения 2э выключить свет лестница
+    trigger:
+      platform: state
+      entity_id: binary_sensor.mega2_15
+      to: 'on'
+      for: '00:10:00'
+    action:
+      service: light.turn_off
+      entity_id: light.mega2_13
+      
+  - alias: Датчик движения 2э выключить свет туалет
+    trigger:
+      platform: state
+      entity_id: binary_sensor.mega2_15
+      to: 'on'
+      for: '00:15:00'
+    action:
+      service: light.turn_off
+      entity_id: light.mega2_10
+      
+  - alias: Датчик движения 2э выключить свет ванна
+    trigger:
+      platform: state
+      entity_id: binary_sensor.mega2_15
+      to: 'on'
+      for: '00:20:00'
+    action:
+      service: light.turn_off
+      entity_id: light.mega2_25
+
+automation vent:        
+  - alias: вентилятор в туалете 2э
+    trigger:
+      platform: state
+      entity_id: light.mega2_10 # свет в туалете 2э
+      to: 'on'
+      for: '00:03:00'
+    action:
+      service: light.turn_on
+      entity_id: light.mega2_28 # вент в туалете 2э
+      
+  - alias: вентилятор в туалете 2э выключить
+    trigger:
+      platform: state
+      entity_id: light.mega2_28
+      to: 'on'
+      for: '00:10:00'
+    action:
+      service: light.turn_off
+      entity_id: light.mega2_28
+
+
+  - alias: вентилятор в туалете 1э
+    trigger:
+      platform: state
+      entity_id: light.mega1_08 # свет в туалете 1э
+      to: 'on'
+      for: '00:03:00'
+    action:
+      service: light.turn_on
+      entity_id: light.mega1_08 # вент в туалете 1э
+      
+  - alias: вентилятор в туалете 1э выключить
+    trigger:
+      platform: state
+      entity_id: light.mega1_08
+      to: 'on'
+      for: '00:10:00'
+    action:
+      service: light.turn_off
+      entity_id: light.mega1_08
+
+  - alias: рекупы включить
+    trigger:
+      platform: time      
+      at: "21:00:00"
+    condition: 
+       condition: state
+       entity_id: device_tracker.m2103k19pg_2 # Poco phone
+       state: home
+    action:
+      service: light.turn_on
+      entity_id: light.mega2_26
+
+  - alias: рекупы выключить
+    trigger:
+      platform: time      
+      at: "09:00:00"    
+    action:
+      service: light.turn_off
+      entity_id: light.mega2_26
+      
+#sensor:
+  #- platform: template
+   # sensors:
+    #  cold_water_sensor:
+     #   friendly_name: "Показания"
+     
+     
+
+    
+automation tv:    
+  - alias: Alisa включи телевизор
+    trigger:
+      - platform: event
+        event_type: yandex_intent
+        event_data:
+          text: Включи телевизор
+          
+      - platform: webostv.turn_on
+        entity_id: media_player.lg_webos_tv_sm8600pla
+    action:
+      - service: wake_on_lan.send_magic_packet
+        data:
+          mac: 20:17:42:DC:D7:56
+      - wait_for_trigger:
+        - platform: state
+          entity_id: media_player.lg_webos_tv_sm8600pla
+          to: 'on'
+      - service: media_player.select_source
+        entity_id:  media_player.lg_webos_tv_sm8600pla
+        data:
+          source: "TVIP Media"
+          
+  - alias: Alisa выключи телевизор
+    trigger:
+      - platform: event
+        event_type: yandex_intent
+        event_data:
+          text: Выключи телевизор          
+    action:
+      - service: media_player.turn_off
+        entity_id:  media_player.lg_webos_tv_sm8600pla
+          
+script:
+  test_script:
+    sequence:
+      - service: media_player.turn_off
+        entity_id:  media_player.lg_webos_tv_sm8600pla        
