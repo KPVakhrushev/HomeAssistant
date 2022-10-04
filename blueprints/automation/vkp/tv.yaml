@@ -1,0 +1,40 @@
+blueprint:
+  name: MY Включение телика в гостиной
+  description: Okko фильмы и сериалы HD, TVIP Media, YouTube, YouTube Детям, ivi - Full HD, 4K, Кинопоиск, Фото и видео
+  domain: automation
+  
+  input:
+    tv_source:
+      # source_list:
+      # - Okko фильмы и сериалы HD
+      # - TVIP Media
+      # - YouTube
+      # - YouTube Детям
+      # - ivi - Full HD, 4K
+      # - Кинопоиск
+      # - Фото и видео
+      name: LG webOS TV source      
+      default: "TVIP Media"
+    alisa_phrase:
+      name: alisa phrase      
+      default: Включи телевизор
+
+trigger:
+  - platform: event
+    event_type: yandex_intent
+    event_data:
+      text: !input alisa_phrase
+action:
+  - service: wake_on_lan.send_magic_packet
+    data:
+      mac: 20:17:42:DC:D7:56
+      
+  - wait_template: "{{ is_state('media_player.lg_webos_tv_sm8600pla', 'on') }}"
+    timeout: "00:00:10"
+    
+  - service: media_player.select_source
+    entity_id:  media_player.lg_webos_tv_sm8600pla
+    data:
+      source: !input tv_source
+      
+      
