@@ -58,6 +58,27 @@ automation water:
               - counter.hot_water_counter
           service: counter.increment
                  
+automation dd1:               
+  - alias: Датчик движения 1э выключить свет прихожая
+    trigger:
+      platform: state
+      entity_id: binary_sensor.mega1_28
+      to: 'on'
+      for: '00:05:00'
+    action:
+      service: light.turn_off
+      entity_id: light.mega1_00
+      
+  - alias: Датчик движения 1э выключить свет туалет
+    trigger:
+      platform: state
+      entity_id: binary_sensor.mega1_28
+      to: 'on'
+      for: '00:15:00'
+    action:
+      service: light.turn_off
+      entity_id: light.mega1_08
+      
 automation dd2:        
   - alias: Датчик движения 2э включить
     trigger:
@@ -126,7 +147,7 @@ automation dd2:
     action:
       service: light.turn_off
       entity_id: light.mega2_25
-
+              
 automation vent:        
   - alias: вентилятор в туалете 2э
     trigger:
@@ -196,7 +217,6 @@ automation vent:
      #   friendly_name: "Показания"
      
      
-
     
 automation tv:    
   - alias: Кнопка включить ТВ
@@ -245,6 +265,7 @@ automation tv:
       input:
         alisa_phrase: Включи тюбик
         tv_source: YouTube
+        
 script my:
   test_script:
     sequence:
