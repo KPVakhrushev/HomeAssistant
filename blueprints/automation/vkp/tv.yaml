@@ -36,5 +36,7 @@ action:
     entity_id:  media_player.lg_webos_tv_sm8600pla
     data:
       source: !input tv_source
-      
+  
+  - service: media_player.turn_off
+    entity_id: media_player.yandex_station_ff98f02980eeffdc6b865953
       

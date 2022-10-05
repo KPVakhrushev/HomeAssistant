@@ -20,6 +20,9 @@ yandex_station_intents: # https://github.com/dext0r/ha-yandex-station-intents
         - Телевизор
       say_phrase: Слушаюсь, хозяин
     Выключи телевизор: Окей
+    Включи окко: Окей, включаю окко
+    Включи кинопоиск: Окей, включаю кинопоиск
+    Включи тюбик:  Окей, включаю ютюб 
     
 mega:
   mega2:
@@ -62,9 +65,22 @@ automation dd2:
       entity_id: binary_sensor.mega2_15
       to: 'off'
     condition: 
-       condition: state
-       entity_id: sun.sun
-       state: below_horizon
+       - condition: state
+         entity_id: sun.sun
+         state: below_horizon
+       - condition: state
+         entity_id: light.mega2_13 #лестница 
+         state: 'off'
+       - condition: state
+         entity_id: light.mega2_07 #кабинет         
+         state: 'off'
+       - condition: state
+         entity_id: light.mega2_11 #спальня
+         state: 'off'         
+       - condition: state
+         entity_id: light.mega2_08 #детская
+         state: 'off'
+         
     action:
       service: light.turn_on
       entity_id: light.mega2_12
@@ -141,7 +157,7 @@ automation vent:
       for: '00:03:00'
     action:
       service: light.turn_on
-      entity_id: light.mega1_08 # вент в туалете 1э
+      entity_id: light.mega1_02 # вент в туалете 1э
       
   - alias: вентилятор в туалете 1э выключить
     trigger:
@@ -151,7 +167,7 @@ automation vent:
       for: '00:10:00'
     action:
       service: light.turn_off
-      entity_id: light.mega1_08
+      entity_id: light.mega1_02
 
   - alias: рекупы включить
     trigger:
@@ -183,27 +199,14 @@ automation vent:
 
     
 automation tv:    
-  - alias: Alisa включи телевизор
-    trigger:
-      - platform: event
-        event_type: yandex_intent
-        event_data:
-          text: Включи телевизор
-          
+  - alias: Кнопка включить ТВ
+    trigger:   
       - platform: webostv.turn_on
         entity_id: media_player.lg_webos_tv_sm8600pla
     action:
       - service: wake_on_lan.send_magic_packet
         data:
           mac: 20:17:42:DC:D7:56
-      - wait_for_trigger:
-        - platform: state
-          entity_id: media_player.lg_webos_tv_sm8600pla
-          to: 'on'
-      - service: media_player.select_source
-        entity_id:  media_player.lg_webos_tv_sm8600pla
-        data:
-          source: "TVIP Media"
           
   - alias: Alisa выключи телевизор
     trigger:
@@ -214,9 +217,36 @@ automation tv:
     action:
       - service: media_player.turn_off
         entity_id:  media_player.lg_webos_tv_sm8600pla
-          
-script:
+  
+  - alias: Включить кинопоиск
+    use_blueprint:
+      path: vkp/tv.yaml
+      input:
+        alisa_phrase: Включи кинопоиск
+        tv_source: Кинопоиск
+  
+  - alias: Включить окко
+    use_blueprint:
+      path: vkp/tv.yaml
+      input:
+        alisa_phrase: Включи окко
+        tv_source: Okko фильмы и сериалы HD
+  
+  - alias: Включить телик
+    use_blueprint:
+      path: vkp/tv.yaml
+      input:
+        alisa_phrase: Включи телевизор
+        tv_source: TVIP Media
+  
+  - alias: Включить тюб
+    use_blueprint:
+      path: vkp/tv.yaml
+      input:
+        alisa_phrase: Включи тюбик
+        tv_source: YouTube
+script my:
   test_script:
     sequence:
       - service: media_player.turn_off
-        entity_id:  media_player.lg_webos_tv_sm8600pla        
+        entity_id: media_player.yandex_station_ff98f02980eeffdc6b865953     
